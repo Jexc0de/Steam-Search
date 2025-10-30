@@ -12,7 +12,7 @@ import itertools
 class Game:
     appid: int
     name: str
-    is_free: bool
+    price: float
     release_date: str
 
 
@@ -31,12 +31,12 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, is_free, release_date FROM steam_apps;")
+        cursor.execute("SELECT appid, name, price, release_date FROM steam_apps;")
         rows = cursor.fetchall()
 
         for row in rows:
-            appid, name, is_free, release_date = row
-            games.append(Game(appid=appid, name=name, is_free=is_free, release_date=release_date))
+            appid, name, price, release_date = row
+            games.append(Game(appid=appid, name=name, price=price, release_date=release_date))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
@@ -45,9 +45,9 @@ def read_games_from_db(db_path: str) -> List[Game]:
     return games
 
 
-def build_heap(games: List[Game], sort_by: str = "is_free", descending: bool = False):
-    if sort_by == "is_free":
-        key_func = lambda g: g.is_free
+def build_heap(games: List[Game], sort_by: str = "price", descending: bool = False):
+    if sort_by == "price":
+        key_func = lambda g: g.price
     else:
         key_func = lambda g: date_to_int(g.release_date)
 
@@ -93,5 +93,5 @@ if __name__ == "__main__":
 
         print("\nTop 5 most recent games:")
         for g in top_games:
-            print(f"- {g.name} ({'Free' if g.is_free else '$$'}, ID: {g.appid}): released {g.release_date}")
+            print(f"- {g.name} (${g.is_free}): released {g.release_date}")
 
