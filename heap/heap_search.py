@@ -7,7 +7,7 @@ import itertools
 
 @dataclass
 class Game:
-    # appid: int
+    appid: int
     name: str
     price: float
     release_date: str
@@ -88,12 +88,12 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT name, price, release_date FROM games;")
+        cursor.execute("SELECT appid, name, price, release_date FROM games;")
         rows = cursor.fetchall()
 
         for row in rows:
-            name, price, release_date = row
-            games.append(Game(name=name, price=price, release_date=release_date))
+            appid, name, price, release_date = row
+            games.append(Game(appid=appid, name=name, price=price, release_date=release_date))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
