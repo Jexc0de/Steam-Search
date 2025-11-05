@@ -2,7 +2,6 @@
 #This reads the db and builds the heap, adjust the db filepath on line 79 (in the main function)
 
 import sqlite3
-import heapq
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List
@@ -14,6 +13,66 @@ class Game:
     name: str
     price: float
     release_date: str
+
+class Heap:
+    def __init__(self, key_func, descending=False):
+        self.data = []
+        self.key_func = key_func
+        self.descending = descending
+        self.counter = itertools.count()
+
+    def _compare(self, a, b):
+        # Returns True if a should be above b in heap
+        if self.descending:
+            return a[0] > b[0]  # max-heap
+        else:
+            return a[0] < b[0]  # min-heap
+
+    def push(self, item):
+        key = self.key_func(item)
+        count = next(self.counter)
+        node = (key, count, item)
+        self.data.append(node)
+        self._sift_up(len(self.data) - 1)
+
+    def pop(self):
+        if not self.data:
+            raise IndexError("pop from empty heap")
+
+        top = self.data[0]
+        last = self.data.pop()
+        if self.data:
+            self.data[0] = last
+            self._sift_down(0)
+
+        return top[2]
+
+    def _sift_up(self, idx):
+        parent = (idx - 1) // 2
+        while idx > 0 and self._compare(self.data[idx], self.data[parent]):
+            self.data[idx], self.data[parent] = self.data[parent], self.data[idx]
+            idx = parent
+            parent = (idx - 1) // 2
+
+    def _sift_down(self, idx):
+        n = len(self.data)
+        while True:
+            left = 2 * idx + 1
+            right = 2 * idx + 2
+            best = idx
+
+            if left < n and self._compare(self.data[left], self.data[best]):
+                best = left
+            if right < n and self._compare(self.data[right], self.data[best]):
+                best = right
+
+            if best == idx:
+                break
+            self.data[idx], self.data[best] = self.data[best], self.data[idx]
+            idx = best
+
+    def __len__(self):
+        return len(self.data)
 
 
 # "Nov 1, 2000" → 20001101
@@ -31,7 +90,7 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, price, release_date FROM games;")
+        cursor.execute("SELECT appid, name, price, release_date FROM steam_apps;")
         rows = cursor.fetchall()
 
         for row in rows:
@@ -46,44 +105,23 @@ def read_games_from_db(db_path: str) -> List[Game]:
 
 
 def build_heap(games: List[Game], sort_by: str = "price", descending: bool = False):
-
-    def floatify(x):
-        try: 
-            return float(x)
-        except (TypeError,ValueError):
-            return 0.0
-
-
-
     if sort_by == "price":
-        key_func = lambda g: floatify(getattr(g,g.price,0))
-    elif sort_by == "release_date":
+        key_func = lambda g: g.price
+    else:
         key_func = lambda g: date_to_int(g.release_date)
-    elif sort_by == "review_percent":
-        key_func = lambda g: floatify(getattr(g, "review_percent", 0))
-    else:
-        key_func = lambda g: 0
-        
 
-    counter = itertools.count()
-
-    # for descending, negate key
-    if descending:
-        heap = [(-key_func(g), next(counter), g) for g in games]
-    else:
-        heap = [(key_func(g), next(counter), g) for g in games]
-
-    heapq.heapify(heap)
+    heap = Heap(key_func, descending=descending)
+    for g in games:
+        heap.push(g)
     return heap
 
 
-def extract_top_n(heap, n: int):
+def extract_top_n(heap: Heap, n: int):
     result = []
     for _ in range(n):
-        if not heap:
+        if len(heap) == 0:
             break
-        _, _, game = heapq.heappop(heap)
-        result.append(game)
+        result.append(heap.pop())
     return result
 
 
@@ -91,7 +129,7 @@ def extract_top_n(heap, n: int):
 if __name__ == "__main__":
 
     # adjust the dathpath of the db file here
-    db_path = "./games_only.db"
+    db_path = "toy.db"
 
 
 
@@ -103,10 +141,10 @@ if __name__ == "__main__":
         print(f"Loaded {len(games)} games from {db_path}")
 
         # Ex: release date descending
-        heap = build_heap(games, sort_by="release_date", descending=True)
+        heap = build_heap(games, sort_by="price", descending=True)
         top_games = extract_top_n(heap, 5)
 
         print("\nTop 5 most recent games:")
         for g in top_games:
-            print(f"- {g.name}: released {g.release_date}")
+            print(f"- {g.name} : price ${g.price}")
 
