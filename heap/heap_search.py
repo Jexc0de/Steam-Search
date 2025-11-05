@@ -93,5 +93,5 @@ if __name__ == "__main__":
 
         print("\nTop 5 most recent games:")
         for g in top_games:
-            print(f"- {g.name} (${g.is_free}): released {g.release_date}")
+            print(f"- {g.name}: released {g.release_date}")
 
