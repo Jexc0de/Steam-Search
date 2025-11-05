@@ -1,6 +1,4 @@
 
-#This reads the db and builds the heap, adjust the db filepath on line 79 (in the main function)
-
 import sqlite3
 from datetime import datetime
 from dataclasses import dataclass
@@ -9,7 +7,7 @@ import itertools
 
 @dataclass
 class Game:
-    appid: int
+    # appid: int
     name: str
     price: float
     release_date: str
@@ -90,12 +88,12 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, price, release_date FROM steam_apps;")
+        cursor.execute("SELECT name, price, release_date FROM games;")
         rows = cursor.fetchall()
 
         for row in rows:
-            appid, name, price, release_date = row
-            games.append(Game(appid=appid, name=name, price=price, release_date=release_date))
+            name, price, release_date = row
+            games.append(Game(name=name, price=price, release_date=release_date))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
@@ -126,25 +124,24 @@ def extract_top_n(heap: Heap, n: int):
 
 
 # Example
-if __name__ == "__main__":
-
-    # adjust the dathpath of the db file here
-    db_path = "toy.db"
-
-
-
-    games = read_games_from_db(db_path)
-
-    if not games:
-        print("No games found in database.")
-    else:
-        print(f"Loaded {len(games)} games from {db_path}")
-
-        # Ex: release date descending
-        heap = build_heap(games, sort_by="price", descending=True)
-        top_games = extract_top_n(heap, 5)
-
-        print("\nTop 5 most recent games:")
-        for g in top_games:
-            print(f"- {g.name} : price ${g.price}")
+# if __name__ == "__main__":
+#
+#     # adjust the dathpath of the db file here
+#     db_path = "games_only.db"
+#
+#
+#
+#     games = read_games_from_db(db_path)
+#
+#     if not games:
+#         print("No games found in database.")
+#     else:
+#         print(f"Loaded {len(games)} games from {db_path}")
+#
+#         heap = build_heap(games, sort_by="price", descending=True)
+#         top_games = extract_top_n(heap, 5)
+#
+#         print("\nTop 5 games:")
+#         for g in top_games:
+#             print(f"- {g.name} : price ${g.price}")
 
