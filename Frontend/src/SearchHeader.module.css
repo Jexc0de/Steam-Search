@@ -1,0 +1,16 @@
+.searchContainer {
+  display: flex;
+  gap: 5px;
+}
+
+.input {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid gray;
+}
+
+.iconBtn {
+  padding: 6px;
+  cursor: pointer;
+  border: 1px solid gray;
+}

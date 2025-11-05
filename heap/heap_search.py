@@ -31,7 +31,7 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, price, release_date FROM steam_apps;")
+        cursor.execute("SELECT appid, name, price, release_date FROM games;")
         rows = cursor.fetchall()
 
         for row in rows:
@@ -46,12 +46,27 @@ def read_games_from_db(db_path: str) -> List[Game]:
 
 
 def build_heap(games: List[Game], sort_by: str = "price", descending: bool = False):
+
+    def floatify(x):
+        try: 
+            return float(x)
+        except (TypeError,ValueError):
+            return 0.0
+
+
+
     if sort_by == "price":
-        key_func = lambda g: g.price
-    else:
+        key_func = lambda g: floatify(getattr(g,g.price,0))
+    elif sort_by == "release_date":
         key_func = lambda g: date_to_int(g.release_date)
+    elif sort_by == "review_percent":
+        key_func = lambda g: floatify(getattr(g, "review_percent", 0))
+    else:
+        key_func = lambda g: 0
+        
 
     counter = itertools.count()
+
     # for descending, negate key
     if descending:
         heap = [(-key_func(g), next(counter), g) for g in games]
@@ -76,7 +91,7 @@ def extract_top_n(heap, n: int):
 if __name__ == "__main__":
 
     # adjust the dathpath of the db file here
-    db_path = "toy.db"
+    db_path = "./games_only.db"
 
 
 
