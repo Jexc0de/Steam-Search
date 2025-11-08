@@ -28,6 +28,7 @@ trie = GameTrie().build((g.appid,g.name)for g in gamesList)
 app = Flask(__name__)
 CORS(app)  
 
+ #API call to construct trie, based off the queuery and max amount requested back
 @app.get("/search/trie")
 def searchTrie():
 
@@ -38,6 +39,7 @@ def searchTrie():
     results = trie.search(query,limit)
     finalTime = (perf_counter()-start)*1000
 
+    #Based off trie returning only the game name and appid we must search the construct the game objects based off games list for the frontend
     gameLookup = {g.appid: g for g in gamesList}
     detailedGames = []
     for r in results:
@@ -59,26 +61,26 @@ def searchTrie():
 
 
 
-
+#API call for heap results
 @app.get("/search/heap")
 def searchHeap():
 
     sort_by = request.args.get("sort_by","")
     descending = True
-
+ #based off how the heap is contructed sort request pasrse for min or max heap
     if sort_by in ("review_high", "price_high"):
         descending = True
     elif sort_by in ("review_low", "price_low"):
         descending = False
 
     limit = int(request.args.get("limit",10))
-
+    #They are then mapped to match the expected requested by the heap code
     map = {"review_high": "metacritic_score","review_low": "metacritic_score","price_high": "price",
             "price_low": "price"}
 
     sorting_key= map.get(sort_by,"review_percent") 
 
-
+    #by default heap returns the entire object
     start = perf_counter()
     heap = build_heap(gamesList,sort_by=sorting_key,descending=descending)
     results = extract_top_n(heap,limit)
