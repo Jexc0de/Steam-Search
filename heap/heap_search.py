@@ -99,7 +99,11 @@ def read_games_from_db(db_path: str) -> List[Game]:
                 if not (0 <= score <= 100):
                     continue  # skip invalid scores
             except (TypeError, ValueError):
-                continue  # skip null or non-numeric entries
+                continue  # skip null or non-numeric scores
+            if not release_date or not isinstance(release_date, str):
+                continue
+            if date_to_int(release_date) == 0:  # invalid format
+                continue
             games.append(Game(appid=appid, name=name, price=price, release_date=release_date, metacritic_score=score))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
