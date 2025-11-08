@@ -12,6 +12,7 @@ class Game:
     price: float
     release_date: str
     metacritic_score: int
+    header: str
 
 class Heap:
     def __init__(self, key_func, descending=False):
@@ -89,18 +90,16 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, price, release_date, metacritic_score FROM games;")
+        cursor.execute("SELECT appid, name, price, release_date, metacritic_score, header_image FROM games;")
         rows = cursor.fetchall()
 
         for row in rows:
-            appid, name, price, release_date, metacritic_score = row
+            appid, name, price, release_date, metacritic_score,header_image = row
             try:
                 score = int(metacritic_score)
-                if not (0 <= score <= 100):
-                    continue  # skip invalid scores
             except (TypeError, ValueError):
-                continue  # skip null or non-numeric entries
-            games.append(Game(appid=appid, name=name, price=price, release_date=release_date, metacritic_score=score))
+                score = 0
+            games.append(Game(appid=appid, name=name, price=price, release_date=release_date, metacritic_score=score,header=header_image))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:

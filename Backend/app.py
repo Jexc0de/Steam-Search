@@ -46,12 +46,13 @@ def searchTrie():
         game = gameLookup.get(appid)
         if game:
              detailedGames.append({
-                "appid": appid,"name": game.name,"price": getattr(game, "price", 0),
-                "review_percent": getattr(game, "review_percent", None),"release_date": getattr(game, "release_date", "")
+                "appid": game.appid,"name": game.name,"price": getattr(game, "price", 0),
+                "review_percent": getattr(game, "metacritic_score", None), "release_date": getattr(game, "release_date", ""),
+                "header": getattr(game, "header", ""),
             })
         else:
              detailedGames.append({"appid": appid,"name": r.get("name", ""),
-                                   "price": 0,"review_percent": None,"release_date": ""
+                                   "price": 0,"review_percent": None,"release_date": "","header": "",
             })
     return jsonify({"time_ms":round(finalTime,4),"results":detailedGames})
 
@@ -66,16 +67,15 @@ def searchHeap():
     sort_by = request.args.get("sort_by","")
     descending = True
 
-    if sort_by in ("review_high", "price_high", "year_new"):
+    if sort_by in ("review_high", "price_high"):
         descending = True
-    elif sort_by in ("review_low", "price_low", "year_old"):
+    elif sort_by in ("review_low", "price_low"):
         descending = False
 
     limit = int(request.args.get("limit",10))
 
-    map = {"review_high": "review_percent","review_low": "review_percent","price_high": "price",
-            "price_low": "price", "year_new": "release_date", "year_old": "release_date",
-    }
+    map = {"review_high": "metacritic_score","review_low": "metacritic_score","price_high": "price",
+            "price_low": "price"}
 
     sorting_key= map.get(sort_by,"review_percent") 
 
@@ -87,8 +87,11 @@ def searchHeap():
     return jsonify({
         "time_ms": round(finalTime, 4),
         "results": [
-            {"appid": g.appid,"name": g.name,"price": getattr(g, "price", 0),
-                "review_percent": getattr(g, "review_percent", None),"release_date": getattr(g, "release_date", "")
+            {"appid": g.appid,
+             "name": g.name,
+             "price": getattr(g, "price", 0),
+                "review_percent":getattr(g,"metacritic_score",None),
+                "header": getattr(g, "header", None)
             }
             for g in results
         ]
