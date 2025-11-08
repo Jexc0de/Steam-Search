@@ -21,7 +21,7 @@ python app.py
 
 > (make sure the local host the server is running on is the same that the fetchs are being sent too on Frontend\src\MainPage.jsx lines 13 and 21, by default its port 5000)
 
-> Once you've done, open a new terminal for the frontend local host
+> Once you've done that open a new terminal for the frontend local host
 
 cd frontend
 npm install
@@ -29,12 +29,4 @@ npm run dev
 
 ### Usage
 
-[Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.]
-
-### Authors and acknowledgment
-
-[Anyone who have contributed to the project.]
-
-### Project status
-
-In development.
+Steam searches intention is to provide a quick simple look up of some of the games across steam, and in doing so compare the trie and heap data structures.

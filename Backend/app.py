@@ -24,7 +24,6 @@ with sqlite3.connect(DB_PATH) as conn:
 
 gamesList = read_games_from_db(DB_PATH)
 trie = GameTrie().build((g.appid,g.name)for g in gamesList)
-print(f"Loaded {len(gamesList)} games")
 
 app = Flask(__name__)
 CORS(app)  
