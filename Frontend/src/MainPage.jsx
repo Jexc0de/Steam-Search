@@ -47,7 +47,7 @@ export default function MainPage() {
             <button onClick={handleTrieSearch}>🔍</button>
           </div>
 
-          <h2 className={styles.sectionTitle}>Sort / Compare by Attribute</h2>
+          <h2 className={styles.sectionTitle}>Sort by Attribute</h2>
           <div className={styles.attributeMenu}>
             <select value={attribute} onChange={(e) => setAttribute(e.target.value)}>
               <option value="">Select Attribute</option>
@@ -55,8 +55,6 @@ export default function MainPage() {
               <option value="review_low">Lowest Review %</option>
               <option value="price_high">Highest Price</option>
               <option value="price_low">Lowest Price</option>
-              <option value="year_new">Newest Release Year</option>
-              <option value="year_old">Oldest Release Year</option>
             </select>
             <button onClick={handleHeapSearch}>Compare</button>
           </div>
@@ -86,14 +84,12 @@ export default function MainPage() {
 
         <div className={styles.cardText}>
           <strong>{r.name || '[Title]'}</strong>
-          {r.release_date && (
-            <div>Released: {r.release_date}</div>
-          )}
+          
           {r.price !== undefined && r.price !== null && !isNaN(r.price) &&(
             <div>Price: ${Number(r.price).toFixed(2)}</div>
           )}
           {r.review_percent !== undefined && (
-            <div>Review: {r.review_percent}%</div>
+            <div>Review: {r.review_percent ?? "No score"}{r.review_percent != null && "%"}</div>
           )}
         </div>
       </div>
