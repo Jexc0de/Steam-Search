@@ -11,6 +11,7 @@ class Game:
     name: str
     price: float
     release_date: str
+    metacritic_score: int
 
 class Heap:
     def __init__(self, key_func, descending=False):
@@ -88,12 +89,18 @@ def read_games_from_db(db_path: str) -> List[Game]:
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT appid, name, price, release_date FROM games;")
+        cursor.execute("SELECT appid, name, price, release_date, metacritic_score FROM games;")
         rows = cursor.fetchall()
 
         for row in rows:
-            appid, name, price, release_date = row
-            games.append(Game(appid=appid, name=name, price=price, release_date=release_date))
+            appid, name, price, release_date, metacritic_score = row
+            try:
+                score = int(metacritic_score)
+                if not (0 <= score <= 100):
+                    continue  # skip invalid scores
+            except (TypeError, ValueError):
+                continue  # skip null or non-numeric entries
+            games.append(Game(appid=appid, name=name, price=price, release_date=release_date, metacritic_score=score))
     except sqlite3.Error as e:
         print(f"SQLite error: {e}")
     finally:
@@ -105,8 +112,10 @@ def read_games_from_db(db_path: str) -> List[Game]:
 def build_heap(games: List[Game], sort_by: str = "price", descending: bool = False):
     if sort_by == "price":
         key_func = lambda g: g.price
-    else:
+    elif sort_by == "release_date":
         key_func = lambda g: date_to_int(g.release_date)
+    elif sort_by == "metacritic_score":
+        key_func = lambda g: g.metacritic_score
 
     heap = Heap(key_func, descending=descending)
     for g in games:
